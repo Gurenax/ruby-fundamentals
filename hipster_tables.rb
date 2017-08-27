@@ -8,8 +8,9 @@ def volume_of_table (area_of_table_top, height_from_grouund)
     area_of_table_top * height_from_grouund
 end
 
-def calculate_volume_of_hipster_table(base_of_triangle, height_of_triangle, height_of_table)
-    volume_of_table( area_of_triangle(base_of_triangle, height_of_triangle), height_of_table )
+def calculate_volume_of_hipster_table(base_of_triangle, height_of_triangle, width_of_table)
+    area = area_of_triangle(base_of_triangle, height_of_triangle)
+    volume = volume_of_table( area, width_of_table )
 end
 
 volume_of_hipster_table = calculate_volume_of_hipster_table(4, 3, 10)
