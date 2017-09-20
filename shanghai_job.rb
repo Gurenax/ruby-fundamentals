@@ -6,23 +6,48 @@ end
 
 def exchange_money(from_currency, to_currency, money)
 
+    exchange_rate_data = [
+        {   # 1 Thai Baht = 0.20 Chinese Renminbi
+            from_currency: "thb",
+            to_currency: "cny",
+            exchange_rate: 0.20
+        },
+        {   # 1 Viet Dong = 0.00034 Hongkong Dollar
+            from_currency: "vnd",
+            to_currency: "hkd",
+            exchange_rate: 0.00034
+        }
+    ]
+
     exchange_rate = 0
 
     
-    if from_currency=="thb" and to_currency=="cny" # 1 Thai Baht = 0.20 Chinese Renminbi
-        exchange_rate = 0.20
+    # if from_currency=="thb" and to_currency=="cny" # 1 Thai Baht = 0.20 Chinese Renminbi
+    #     exchange_rate = 0.20
 
-    elsif from_currency=="vnd" and to_currency=="hkd" # 1 Viet Dong = 0.00034 Hongkong Dollar
-        exchange_rate = 0.00034
+    # elsif from_currency=="vnd" and to_currency=="hkd" # 1 Viet Dong = 0.00034 Hongkong Dollar
+    #     exchange_rate = 0.00034
 
-    end
+    # end
+
+    exchange_rate_data.each { |exchange|
+        if from_currency==exchange[:from_currency] and exchange[:to_currency]
+            exchange_rate = exchange[:exchange_rate]
+            break
+        end
+    }
 
     convert_currency(money, exchange_rate)
 end
 
 
-one_hundred_thb_to_cny = exchange_money("thb","cny", 100)
-one_hundred_vnd_to_hkd = exchange_money("vnd","hkd", 100)
 
-p one_hundred_thb_to_cny
-p one_hundred_vnd_to_hkd
+
+
+p exchange_money("thb","cny", 100)
+p exchange_money("vnd","hkd", 100)
+p exchange_money("aud","php", 100)
+
+
+# p one_hundred_thb_to_cny
+# p one_hundred_vnd_to_hkd
