@@ -3,7 +3,7 @@
 def ride_ptv(data)
     # List of available lines
     ptv_lines = ["Lilydale", "Belgrave"]
-    ptv_line_count = data[:ptv_line].size
+    # ptv_line_count = data[:ptv_line].size
 
     # Determine the Origin Station and which Line is it
     origin = nil
@@ -21,6 +21,7 @@ def ride_ptv(data)
         destination = find_string_in_array(data[:ptv_line][destination_ptv_line],data[:destination])
     end
     
+    # If the origin station is not on the same line as the destination
     if origin_ptv_line != destination_ptv_line
         # Determine first possible station to change line
         change_station = (data[:ptv_line][origin_ptv_line] & data[:ptv_line][destination_ptv_line]).first
@@ -110,4 +111,13 @@ ptv_journey = {
     ptv_line: [lilydale_to_city_loop, belgrave_to_city_loop]
 }
 
-p ride_ptv(ptv_journey)
+train_ride = ride_ptv(ptv_journey)
+
+puts "You begin at station #{train_ride[:origin]}"
+puts "You end at station #{train_ride[:destination]}"
+puts "These are all your train stops:"
+train_stop = 1
+train_ride[:stops].each { |stop|
+    puts "#{train_stop} - #{stop}"
+    train_stop += 1
+}
