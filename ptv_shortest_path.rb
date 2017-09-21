@@ -66,10 +66,10 @@ end
 # Method that finds the intersecting station and returns an array of stops
 # from start index to furthest station of the junction
 #
-# This method can be recursed () but for simplicity sake
-# Possible recursion is to use these as parameter:
-# stops_from_start_to_junction_left
-# stops_from_start_to_junction_right
+# This method can be recursed but for simplicity purposes, will not do so
+# Possible recursion is to use these variables as parameter to find_every_intersecting_station:
+#   stops_from_start_to_junction_left
+#   stops_from_start_to_junction_right
 #
 def find_every_intersecting_station(ptv_line_data, line_to_be_checked, line_to_be_checked_index)
     stops = Array.new
@@ -114,14 +114,6 @@ def sort_array_by_length_of_contents(arr)
         x.length
     }
 end
-
-# Delete arrays in an array with length
-# def delete_items_in_array_with_length(arr, length)
-#     arr = arr.reject { |x|
-#         x.length==length
-#     }
-#     arr
-# end
 
 # Find furthest start and furthest end of a train line
 def find_furthest_point_of_every_station(ptv_line_data)
@@ -183,6 +175,7 @@ def ride_ptv(data)
     }
 
     # Find every station that insersects with the station that intersected with the start line
+    # Note to self: no need for this code block if recursion is applied
     stops_intersection = all_routes.clone
     stops_intersection.each { |junction_line|
         station_count = junction_line.size
@@ -210,8 +203,8 @@ def ride_ptv(data)
     # Sort items in array by length of contents
     all_routes = sort_array_by_length_of_contents(all_routes)
 
-    # Find shortest path in all routes
-    shortest_path = find_shortest_path(all_routes, data[:origin], data[:destination])
+    # Result is the shortest path among all routes
+    result = find_shortest_path(all_routes, data[:origin], data[:destination])
 end
 
 # Test Data:
