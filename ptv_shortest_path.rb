@@ -126,6 +126,7 @@ def find_furthest_point_of_every_station(ptv_line_data)
     furthest_points.uniq
 end
 
+# Get the shortest array which has the Origin and Destination elements
 def find_shortest_path(all_routes, origin, destination)
     shortest_path = Array.new
     origin_index = nil
@@ -254,10 +255,10 @@ ptv_journey = {
 
 }
 
+# Run the program
 shortest_path = ride_ptv(ptv_journey)
 
-# puts "You begin at station #{train_ride[:origin]}"
-# puts "You end at station #{train_ride[:destination]}"
+# Output
 puts "This is your best routes to get from #{ptv_journey[:origin]} to #{ptv_journey[:destination]}:"
 train_stop = 1
 shortest_path.each { |stop|
