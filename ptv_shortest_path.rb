@@ -108,19 +108,22 @@ def find_every_intersecting_station(ptv_line_data, line_to_be_checked, line_to_b
     stops
 end
 
+# Method to sort array of arrays by length
 def sort_array_by_length_of_contents(arr)
     arr.sort_by { |x|
         x.length
     }
 end
 
-def delete_items_in_array_with_length(arr, length)
-    arr = arr.reject { |x|
-        x.length==length
-    }
-    arr
-end
+# Delete arrays in an array with length
+# def delete_items_in_array_with_length(arr, length)
+#     arr = arr.reject { |x|
+#         x.length==length
+#     }
+#     arr
+# end
 
+# Find furthest start and furthest end of a train line
 def find_furthest_point_of_every_station(ptv_line_data)
     furthest_points = Array.new
     ptv_line_data.each { |line|
@@ -131,28 +134,48 @@ def find_furthest_point_of_every_station(ptv_line_data)
     furthest_points.uniq
 end
 
+def find_shortest_path(all_routes, origin, destination)
+    shortest_path = Array.new
+    origin_index = nil
+    destination_index = nil
+
+    # puts "All Possible Routes: "
+    all_routes.uniq.each { |stops|
+        # p stops
+
+        if shortest_path.empty?
+
+            # Populate the origin index and destination index
+            origin_index = find_string_in_array(stops, origin)
+            destination_index = find_string_in_array(stops, destination)
+
+            # Check if the origin and destination are in the stop
+            if !origin_index.nil? and !destination_index.nil?
+                shortest_path = stops.clone
+            end
+        end
+    }
+
+    shortest_path[origin_index..destination_index]
+end
+
+# Main method
 def ride_ptv(data)
-    
-    # ptv_lines = ["Lilydale", "Belgrave", "Pakenham", "Craigieburn", "Werribee"]
-    ptv_lines = ["Line 1", "Line 2", "Line 3", "Line 4"]
 
     start_data = determine_station_and_line(data[:ptv_line], data[:origin])
     start_line_index = start_data[:line_index]
     start_station_index = start_data[:station_index]
-
     all_routes = Array.new
     furthest_points = Array.new
 
-    # Find furthest point of every station
+    # Find furthest point of every station (Start/End stations of each train line)
     furthest_points = find_furthest_point_of_every_station(data[:ptv_line])
-    # p furthest_points
 
-    # Append Main Line to All Stops
-    all_routes << data[:ptv_line][start_line_index]
-
-    # p "You start at #{ptv_lines[start_line_index]} Line Station #{start_station_index}"
-
+    # Determine the train line where you start
     start_line = data[:ptv_line][start_line_index]
+
+    # Append Main Line to All Routes. It's a given that the main line from start to end is one of our options
+    all_routes << data[:ptv_line][start_line_index]
 
     # Find every station that intersects with the start line
     find_every_intersecting_station(data[:ptv_line], start_line, start_line_index).each { |stop_data|
@@ -187,40 +210,8 @@ def ride_ptv(data)
     # Sort items in array by length of contents
     all_routes = sort_array_by_length_of_contents(all_routes)
 
-    shortest_path = Array.new
-    origin_index = nil
-    destination_index = nil
-
-    # puts "All Possible Routes: "
-    all_routes.uniq.each { |stops|
-        # p stops
-
-        if shortest_path.empty?
-
-            # Populate the origin index and destination index
-            origin_index = find_string_in_array(stops, data[:origin])
-            destination_index = find_string_in_array(stops, data[:destination])
-
-            # Check if the origin and destination are in the stop
-            if !origin_index.nil? and !destination_index.nil?
-                shortest_path = stops.clone
-            end
-        end
-    }
-
-    # Shortest path is the one with the least stations traversed and least changes
-    shortest_path = shortest_path[origin_index..destination_index]
-    puts "Shortest path: #{shortest_path}"
-
-    # Just get the names of the origin and destination
-    origin = find_string_in_array(start_line, data[:origin])
-    destination = find_string_in_array(shortest_path, data[:destination])
-
-    result = {
-        origin: origin,
-        destination: destination,
-        stops: shortest_path
-    }        
+    # Find shortest path in all routes
+    shortest_path = find_shortest_path(all_routes, data[:origin], data[:destination])
 end
 
 # Test Data:
@@ -270,13 +261,13 @@ ptv_journey = {
 
 }
 
-train_ride = ride_ptv(ptv_journey)
+shortest_path = ride_ptv(ptv_journey)
 
-puts "You begin at station #{train_ride[:origin]}"
-puts "You end at station #{train_ride[:destination]}"
-puts "These are all your train stops:"
+# puts "You begin at station #{train_ride[:origin]}"
+# puts "You end at station #{train_ride[:destination]}"
+puts "This is your best routes to get from #{ptv_journey[:origin]} to #{ptv_journey[:destination]}:"
 train_stop = 1
-train_ride[:stops].each { |stop|
+shortest_path.each { |stop|
     puts "#{train_stop} - #{stop}"
     train_stop += 1
 }
