@@ -296,14 +296,14 @@ ptv_journey = {
     # destination: "Southern Cross",
     # origin: "Southern Cross",
     # destination: "Auburn",
-    origin: "A",
-    destination: "Z",
-    # origin: "Auburn",
-    # destination: "Williamstown",
+    # origin: "A",
+    # destination: "Z",
+    origin: "Craigieburn",
+    destination: "Williamstown",
     # Test Data
-    ptv_line: [line1, line2, line3, line4, line5, line6, line7]
+    # ptv_line: [line1, line2, line3, line4, line5, line6, line7]
     # Actual Data
-    # ptv_line: [lilydale_to_city, belgrave_to_city, pakenham_to_city, craigieburn_to_city, werribee_to_north_melbourne, footscray_to_williamstown]
+    ptv_line: [lilydale_to_city, belgrave_to_city, pakenham_to_city, craigieburn_to_city, werribee_to_north_melbourne, footscray_to_williamstown]
 
 }
 
