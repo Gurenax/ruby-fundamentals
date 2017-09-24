@@ -71,22 +71,31 @@ end
 #   stops_from_start_to_junction_left
 #   stops_from_start_to_junction_right
 #
-def find_every_intersecting_station(ptv_line_data, line_to_be_checked, line_to_be_checked_index)
+# Params:
+# ptv_line_data - all train network data
+# line_to_be_checked  - which line is currently being checked
+# station_index - which station is currently being checked
+def find_every_intersecting_station(ptv_line_data, line_to_be_checked, station_index)
     stops = Array.new
 
     # Every station on that line
     line_to_be_checked.each { |station|
         # Every other line
+
         ptv_line_data.each_with_index { |line, index|
             
+            # Current PTV line being checked
+            # current_ptv_line = ptv_line_data[index]
+
             # Start line shouldn't be the same line
             if line_to_be_checked != line
 
                 # Junction found
+                junction = find_string_in_array(line, station)
                 if !find_string_in_array(line, station).nil?
 
                     #Get stops from start position to junction
-                    stops_from_start_to_junction = get_same_line_stops(line_to_be_checked, line_to_be_checked_index, station)
+                    stops_from_start_to_junction = get_same_line_stops(line_to_be_checked, station_index, station)
 
                     #For each line get left path
                     stops_from_junction_to_left = get_left_stations(ptv_line_data[index], station)
@@ -97,10 +106,12 @@ def find_every_intersecting_station(ptv_line_data, line_to_be_checked, line_to_b
                     #Concatenate starting point to each junction up to its last station
                     stops_from_start_to_junction_left = stops_from_start_to_junction + stops_from_junction_to_left
                     stops_from_start_to_junction_right = stops_from_start_to_junction + stops_from_junction_to_right
+                    
+                    # stops << find_every_intersecting_station(ptv_line_data, stops_from_start_to_junction_left, find_string_in_array(stops_from_start_to_junction_left, station))
+                    # stops << find_every_intersecting_station(ptv_line_data, stops_from_start_to_junction_right, junction)
 
                     stops << stops_from_start_to_junction_left
                     stops << stops_from_start_to_junction_right
-                    
                 end
             end
         }
@@ -148,8 +159,9 @@ def find_shortest_path(all_routes, origin, destination)
             end
         end
     }
-
-    shortest_path[origin_index..destination_index]
+    if !origin_index.nil? and !destination_index.nil?
+        shortest_path[origin_index..destination_index]
+    end
 end
 
 # Main method
@@ -169,58 +181,95 @@ def ride_ptv(data)
 
     # Append Main Line to All Routes. It's a given that the main line from start to end is one of our options
     all_routes << data[:ptv_line][start_line_index]
+    puts "Checking Level 0"
 
-    # Find every station that intersects with the start line
-    find_every_intersecting_station(data[:ptv_line], start_line, start_line_index).each { |stop_data|
-        all_routes << stop_data
-    }
-
-    # Find every station that insersects with the station that intersected with the start line
-    # Note to self: no need for this code block if recursion is applied
-    stops_intersection = all_routes.clone
-    stops_intersection.each { |junction_line|
-        station_count = junction_line.size
-        
-        0.upto(station_count-1) { |each_station_in_junction_line|
-            find_every_intersecting_station(data[:ptv_line], junction_line, each_station_in_junction_line).each { |junction_stops|
-                
-                # All further routes should start with the start station
-                if junction_stops[0]==data[:ptv_line][start_line_index][0]
-
-                    # All further routes should not end with the start station
-                    if junction_stops[-1]!=data[:ptv_line][start_line_index][0]
-
-                        # All further routes should end with the furthest point
-                        # Therefore, furthest point should exist on the furthest points array
-                        if !find_string_in_array(furthest_points, junction_stops[-1]).nil?
-                            all_routes << junction_stops
-                        end
-                    end
-                end
-            }
-        }
-    }
-    
     # Sort items in array by length of contents
     all_routes = sort_array_by_length_of_contents(all_routes)
-
     # Result is the shortest path among all routes
     result = find_shortest_path(all_routes, data[:origin], data[:destination])
+
+    if result.nil?
+        puts "Checking Level 1"
+        find_every_intersecting_station(data[:ptv_line], start_line, start_line_index).each { |stop_data|
+            all_routes << stop_data
+        }
+    end
+
+    # Sort items in array by length of contents
+    all_routes = sort_array_by_length_of_contents(all_routes)
+    # Result is the shortest path among all routes
+    result = find_shortest_path(all_routes, data[:origin], data[:destination])
+
+    # Result was not found in Level 0 or 1
+    level = 2
+    if result.nil?
+        while result.nil?
+            puts "Checking Level #{level}"
+            level += 1
+            # Find every station that insersects with the station that intersected with the start line
+            # Note to self: no need for this code block if recursion is applied
+            
+            # TODO: Optimise to a different method
+            stops_intersection = all_routes.clone
+            stops_intersection.each { |junction_line|
+                station_count = junction_line.size
+                
+                0.upto(station_count-1) { |each_station_in_junction_line|
+                    find_every_intersecting_station(data[:ptv_line], junction_line, each_station_in_junction_line).each { |junction_stops|
+                        
+                        # All further routes should start with the start station
+                        if junction_stops[0]==data[:ptv_line][start_line_index][0]
+
+                            # All further routes should not end with the start station
+                            if junction_stops[-1]!=data[:ptv_line][start_line_index][0]
+
+                                # All further routes should end with the furthest point
+                                # Therefore, furthest point should exist on the furthest points array
+                                if !find_string_in_array(furthest_points, junction_stops[-1]).nil?
+                                    all_routes << junction_stops
+                                end
+                            end
+                        end
+                    }
+                }
+            }
+            
+            # Sort items in array by length of contents
+            all_routes = sort_array_by_length_of_contents(all_routes)
+
+            # all_routes.each { |route|
+            #     p route
+            # }
+            
+            # Result is the shortest path among all routes
+            result = find_shortest_path(all_routes, data[:origin], data[:destination])
+        end
+    end
+    result
 end
 
 # Test Data:
-# line1 = [
-#     "A", "B", "C", "D", "E"
-# ]
-# line2 = [
-#     "F", "G", "D", "H", "I"
-# ]
-# line3 = [
-#     "J", "K", "L", "M", "H"
-# ]
-# line4 = [
-#     "N", "O", "C", "P", "Q", "L", "R"
-# ]
+line1 = [
+    "A", "B", "C", "D", "E"
+]
+line2 = [
+    "F", "G", "D", "H", "I"
+]
+line3 = [
+    "J", "K", "L", "M", "H"
+]
+line4 = [
+    "N", "O", "C", "P", "Q", "L", "R"
+]
+line5 = [
+    "P", "Y"
+]
+line6 = [
+    "X", "Y", "Z"
+]
+line7 = [
+    "Z", "W"
+]
 
 # Actual Data:
 lilydale_to_city = [
@@ -238,20 +287,23 @@ craigieburn_to_city = [
 werribee_to_north_melbourne = [ # Suppose that the line is not servicing the city loop
     "Werribee", "Hoppers Crossing", "Williams Landing", "Aircraft", "Laverton", "Newport", "Spotswood", "Yarraville", "Seddon", "Footscray", "South Kensington", "North Melbourne"
 ]
+footscray_to_williamstown = [
+    "Footscray", "Williamstown"
+]
 
 ptv_journey = {
     # origin: "Auburn",
     # destination: "Southern Cross",
     # origin: "Southern Cross",
     # destination: "Auburn",
-    # origin: "A",
-    # destination: "L",
-    origin: "Auburn",
-    destination: "Footscray",
+    origin: "A",
+    destination: "Z",
+    # origin: "Auburn",
+    # destination: "Williamstown",
     # Test Data
-    # ptv_line: [line1, line2, line3, line4]
+    ptv_line: [line1, line2, line3, line4, line5, line6, line7]
     # Actual Data
-    ptv_line: [lilydale_to_city, belgrave_to_city, pakenham_to_city, craigieburn_to_city, werribee_to_north_melbourne]
+    # ptv_line: [lilydale_to_city, belgrave_to_city, pakenham_to_city, craigieburn_to_city, werribee_to_north_melbourne, footscray_to_williamstown]
 
 }
 
